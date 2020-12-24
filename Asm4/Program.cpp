@@ -1,26 +1,26 @@
 #include <fstream>
 #include <iostream>
 
-extern "C" void  MODIFY_DATA(char* initial_data, char* modified_data, char x, char y);
+extern "C" void  REPLACE(char* initial_data, char* modified_data, char x, char y);
 void Input(char* data, int file_size, char& x, char& y);
 void Output(char* data, int file_size);
 
 
 int main()
 {
-    const int DATA_CAPACITY = 1024;
-    char initial_data[DATA_CAPACITY], modified_data[DATA_CAPACITY], x, y;
+    const int size = 1024;
+    char initial_data[size], modified_data[size], x, y;
     try
     {
-        Input(initial_data, DATA_CAPACITY, x, y);
-        MODIFY_DATA(initial_data, modified_data, 'f', 'h');
-        Output(modified_data, DATA_CAPACITY);
+        Input(initial_data, size, x, y);
+        REPLACE(initial_data, modified_data, x, y);
+        Output(modified_data, size);
     }
     catch (const char* msg)
     {
         std::cout << msg << std::endl;
     }
-    
+
 }
 
 void Input(char* data, int file_size, char& x, char& y)
