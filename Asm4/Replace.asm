@@ -1,23 +1,5 @@
 .386
-.MODEL FLAT,STDCALL
-
-EXTRN  GetStdHandle@4:PROC ; стандартный дескриптор ввода-вывода
-EXTRN  WriteConsoleA@20:PROC ; вывод текста
-EXTRN  CharToOemA@8:PROC ; перекодировка
-EXTRN  ReadConsoleA@20:PROC ; ввод
-EXTRN  ExitProcess@4:PROC ; выход
-EXTRN  lstrlenA@4:PROC ; определение длинны строки
-
-.DATA 
-DOUT DD ? 
-DIN DD ? 
-STRN1 DB "¬ведите символ дл€ замены: ",13,10,0 
-STRN2 DB "¬ведите символ, на который будет произведена замена: ",13,10,0 
-BUF  DB 35 dup (?)
-LENS DD ? 
-
-SYMBOL DB ? 
-SYMBOL_TO_REPLACE DD ? 
+.MODEL FLAT
 
 .CODE 
 
@@ -25,10 +7,10 @@ MODIFY_STRING MACRO
 	LOCAL LOOP_END_OF_STRING, NO_SPACE
 	LOOP_END_OF_STRING:
 		MOV EDX, [EAX]
-		CMP DL, 101
+		CMP DL, [EBP] + 16
 		JE NO_SPACE
 			XOR EDX, EDX
-			MOV DL, 104
+			MOV DL, [EBP] + 20
 		NO_SPACE:
 		MOV [ESI], DL
 		INC ESI
@@ -40,8 +22,7 @@ MODIFY_STRING MACRO
 	INC ESI
 ENDM
 
-_MODIFY_DATA@8 PROC
-    CALL INPUT
+_MODIFY_DATA PROC
 	PUSH EBP
 	MOV EBP, ESP
 	MOV ECX, [EBP]+8
@@ -66,60 +47,7 @@ _MODIFY_DATA@8 PROC
 	POP EBP
 	MOV DL, 0
 	MOV [ESI], DL
-	RET 8
-_MODIFY_DATA@8 ENDP
+	RET 
+_MODIFY_DATA ENDP
 
-INPUT PROC
-	PUSH OFFSET STRN1 
-	PUSH OFFSET STRN1
-	CALL CharToOemA@8 
-
-	PUSH OFFSET STRN2 
-	PUSH OFFSET STRN2
-	CALL CharToOemA@8 
-
-
-	PUSH -10
-	CALL GetStdHandle@4
-	MOV DIN, EAX 	 
-
-
-	PUSH -11
-	CALL GetStdHandle@4
-	MOV DOUT, EAX 
-
-	PUSH OFFSET STRN1 
-	CALL lstrlenA@4 
-
-	PUSH 0 
-	PUSH OFFSET LENS 
-	PUSH EAX 
-	PUSH OFFSET STRN1 
-	PUSH DOUT 
-	CALL WriteConsoleA@20
-
-	PUSH 0 
-	PUSH OFFSET LENS 
-	PUSH 35 
-	PUSH OFFSET SYMBOL_TO_REPLACE 
-	PUSH DIN 
-	CALL ReadConsoleA@20 
-
-	PUSH OFFSET STRN2
-	CALL lstrlenA@4 
-
-	PUSH 0 
-	PUSH OFFSET LENS 
-	PUSH EAX 
-	PUSH OFFSET STRN2 
-	PUSH DOUT 
-	CALL WriteConsoleA@20
-
-	PUSH 0 
-	PUSH OFFSET LENS 
-	PUSH 35 
-	PUSH OFFSET  SYMBOL_TO_REPLACE  
-	PUSH DIN 
-	CALL ReadConsoleA@20 
-	INPUT ENDP
 END
